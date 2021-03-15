@@ -1,0 +1,6 @@
+discord
+asyncio
+tabulate
+random
+math
+commands

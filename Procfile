@@ -1,1 +1,1 @@
-worker: python LarryBot
+worker: python default.py

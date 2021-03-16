@@ -1,4 +1,3 @@
 discord
 asyncio
 tabulate
-discord.ext.commands

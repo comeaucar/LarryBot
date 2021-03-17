@@ -9,14 +9,15 @@ import os
 client = commands.Bot(command_prefix='.', case_insensitive=True)
 
 playerList = []
-game = "type .help for commands"
-await client.change_presence(status=discord.Status.online, activity=game)
+
 
 
 
 @client.event
 async def on_ready():
     print('LarryBot is ready')
+    game = "type .help for commands"
+    await client.change_presence(activity=game)
 
 
 @client.event

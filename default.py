@@ -16,8 +16,7 @@ playerList = []
 @client.event
 async def on_ready():
     print('LarryBot is ready')
-    game = "type .help for commands"
-    await client.change_presence(activity=game)
+    await bot.change_presence(activity=discord.Game(name="type .help for commands ¯\_(ツ)_/¯"))
 
 
 @client.event

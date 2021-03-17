@@ -10,7 +10,7 @@ client = commands.Bot(command_prefix='.', case_insensitive=True)
 
 playerList = []
 game = "type .help for commands"
-await client.change_presence(activity=game)
+await client.change_presence(status=discord.Status.online, activity=game)
 
 
 

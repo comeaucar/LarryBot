@@ -9,6 +9,9 @@ import os
 client = commands.Bot(command_prefix='.', case_insensitive=True)
 
 playerList = []
+game = "type .help for commands"
+await client.change_presence(activity=game)
+
 
 
 @client.event

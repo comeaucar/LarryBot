@@ -6,11 +6,13 @@ from discord.ext import commands
 import random
 import math
 import os
+import requests
+import schedule
+import time
+
 client = commands.Bot(command_prefix='.', case_insensitive=True)
 
 playerList = []
-
-
 
 
 @client.event
@@ -32,6 +34,27 @@ async def on_member_remove(member):
 @client.command()
 async def ping(ctx):
     await ctx.send('Pong')
+
+
+@client.command()
+async def weather(ctx):
+    url = "https://community-open-weather-map.p.rapidapi.com/weather"
+    querystring = {"q": "Windsor", "lat": "0", "lon": "0", "callback": "test", "id": "2172797", "lang": "null",
+                   "units": "metric", "mode": "xml, html"}
+    headers = {
+        'x-rapidapi-key': "af9c139833mshfbd108e5b781b27p1ee771jsn2060a2fe19f1",
+        'x-rapidapi-host': "community-open-weather-map.p.rapidapi.com"
+    }
+    response = requests.request("GET", url, headers=headers, params=querystring)
+    await ctx.send("Good Morning! Here is Windsor Weather for Today")
+    await ctx.send("")
+    await ctx.send("Weather Right Now: " + response.text.split(',')[4].split(':')[1].strip('"'))
+    await ctx.send("Current Temperature: " + response.text.split(',')[7].split(':')[2] + '℃')
+    await ctx.send("Today's Low: " + response.text.split(',')[9].split(':')[1])
+    await ctx.send("Today's High: " + response.text.split(',')[10].split(':')[1])
+
+
+schedule.every().day.at('8:00').do(weather)
 
 
 @client.command()
@@ -296,6 +319,10 @@ class MyHelpCommand(commands.MinimalHelpCommand):
             e.description += page
         await destination.send(embed=e)
 
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
 
 client.help_command = MyHelpCommand()
 

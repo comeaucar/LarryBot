@@ -7,7 +7,6 @@ import random
 import math
 import os
 import requests
-import time
 
 client = commands.Bot(command_prefix='.', case_insensitive=True)
 

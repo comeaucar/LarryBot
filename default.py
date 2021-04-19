@@ -7,7 +7,6 @@ import random
 import math
 import os
 import requests
-import schedule
 import time
 
 client = commands.Bot(command_prefix='.', case_insensitive=True)
@@ -54,7 +53,7 @@ async def weather(ctx):
     await ctx.send("Today's High: " + response.text.split(',')[10].split(':')[1])
 
 
-schedule.every().day.at('8:00').do(weather)
+
 
 
 @client.command()
@@ -321,7 +320,7 @@ class MyHelpCommand(commands.MinimalHelpCommand):
 
 
 
-schedule.run_pending()
+
 
 
 client.help_command = MyHelpCommand()

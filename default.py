@@ -320,9 +320,9 @@ class MyHelpCommand(commands.MinimalHelpCommand):
         await destination.send(embed=e)
 
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+
+schedule.run_pending()
+
 
 client.help_command = MyHelpCommand()
 

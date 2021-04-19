@@ -2,7 +2,7 @@ import asyncio
 import time
 from tabulate import tabulate
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import random
 import math
 import os
@@ -36,7 +36,7 @@ async def ping(ctx):
 
 
 @client.command()
-async def weather(ctx):
+async def windsorWeatherReport(ctx):
     url = "https://community-open-weather-map.p.rapidapi.com/weather"
     querystring = {"q": "Windsor", "lat": "0", "lon": "0", "callback": "test", "id": "2172797", "lang": "null",
                    "units": "metric", "mode": "xml, html"}
@@ -51,9 +51,6 @@ async def weather(ctx):
     await ctx.send("Current Temperature: " + response.text.split(',')[7].split(':')[2] + '℃')
     await ctx.send("Today's Low: " + response.text.split(',')[9].split(':')[1])
     await ctx.send("Today's High: " + response.text.split(',')[10].split(':')[1])
-
-
-
 
 
 @client.command()
@@ -317,10 +314,6 @@ class MyHelpCommand(commands.MinimalHelpCommand):
         for page in self.paginator.pages:
             e.description += page
         await destination.send(embed=e)
-
-
-
-
 
 
 client.help_command = MyHelpCommand()

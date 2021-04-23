@@ -50,7 +50,7 @@ async def getNHLTeams(ctx):
     for t in nhlteams:
         newArr = [str(t['id']), t['name']]
         teamArr.append(newArr)
-    await ctx.send(tabulate(teamArr, headers=['Team ID', "Team Name"], tablefmt='fancy_grid'))
+    await ctx.send(tabulate(teamArr, headers=["Team ID", "Team Name"], tablefmt='fancy_grid'))
 
 @client.command()
 async def getTeamDetails(ctx, teamId):
@@ -118,7 +118,7 @@ async def getPlayerDetails(ctx, teamId, playerNum):
 
 @client.command()
 async def getNHLRoster(ctx, teamId):
-    team = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId)).json()
+    channel = ctx.message.channel
     roster = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId) + "/roster").json()
     rosterArr = []
     for p in range(len(roster['roster'])):
@@ -126,7 +126,7 @@ async def getNHLRoster(ctx, teamId):
                 roster['roster'][p]['position']['abbreviation']]
         rosterArr.append(pArr)
     playerT = tabulate(rosterArr, headers=['Player Name', 'Jersey Number', 'Position'], tablefmt='fancy_grid')
-    await ctx.send(playerT)
+    await channel.send(playerT)
 
 @client.command()
 async def weather(ctx, *, city: str):

@@ -70,7 +70,7 @@ async def getTeamDetails(ctx, teamId):
     await channel.send(embed=embed)
 
 @client.command()
-def getPlayerDetails(ctx, teamId, playerNum):
+async def getPlayerDetails(ctx, teamId, playerNum):
     channel = ctx.message.channel
     roster = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId) + "/roster").json()['roster']
     for i in roster:

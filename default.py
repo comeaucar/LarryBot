@@ -72,11 +72,11 @@ async def getTeamDetails(ctx, teamId):
 
 
 @client.command()
-async def getPlayerDetails(ctx,*, teamId, playerNum):
+async def getPlayerDetails(ctx, teamId: int, playerNum: int):
     channel = ctx.message.channel
     roster = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId) + "/roster").json()['roster']
     for i in roster:
-        if (int(i['jerseyNumber']) == playerNum):
+        if (int(i['jerseyNumber']) == int(playerNum)):
             link = requests.get("https://statsapi.web.nhl.com/api/v1/people/" + str(i['person']['id'])).json()
             playerName = i['person']['fullName']
             playerNumber = i['jerseyNumber']
@@ -103,11 +103,11 @@ async def getPlayerDetails(ctx,*, teamId, playerNum):
             embed.add_field(name="Position", value=f"**{playerPos}**", inline=False)
             embed.add_field(name="Type", value=f"{playerRole}", inline=False)
             embed.add_field(name="Hand", value=f"{handness}", inline=False)
-            embed.add_field(name="Birth City", value=f"{playerNumber}", inline=False)
-            embed.add_field(name="Country", value=f"**{playerPos}**", inline=False)
-            embed.add_field(name="Nationality", value=f"{playerRole}", inline=False)
-            embed.add_field(name="Height", value=f"**{playerPos}**", inline=False)
-            embed.add_field(name="Weight", value=f"{playerRole}", inline=False)
+            embed.add_field(name="Birth City", value=f"{playerCity}", inline=False)
+            embed.add_field(name="Country", value=f"**{playerCountry}**", inline=False)
+            embed.add_field(name="Nationality", value=f"{playerNationality}", inline=False)
+            embed.add_field(name="Height", value=f"**{playerHeight}**", inline=False)
+            embed.add_field(name="Weight", value=f"{playerWeight}", inline=False)
             if playerIsCap == True:
                 embed.add_field(name="Captain", value=f"True", inline=False)
             if playerIsAlt == True:

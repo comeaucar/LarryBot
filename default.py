@@ -55,7 +55,7 @@ async def getNHLTeams(ctx):
 @client.command()
 async def getTeamDetails(ctx, teamId):
     channel = ctx.message.channel
-    team = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(id)).json()
+    team = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId)).json()
     teamName = team['teams'][0]['name']
     teamVenue = team['teams'][0]['venue']['name']
     teamDivision = team['teams'][0]['division']['name']

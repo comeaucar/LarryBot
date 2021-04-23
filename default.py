@@ -61,12 +61,12 @@ async def getTeamDetails(ctx, teamId):
     teamVenue = team['teams'][0]['venue']['name']
     teamDivision = team['teams'][0]['division']['name']
     teamId = team['teams'][0]['id']
-    embed = discord.Embed(title=f"{teamName}",
+    embed = discord.Embed(title=f"**{teamName}**",
                           color=ctx.guild.me.top_role.color,
                           timestamp=ctx.message.created_at, )
-    embed.add_field(name="Team Id", value=f"{str(teamId)}", inline=False)
-    embed.add_field(name="Venue", value=f"**{teamVenue}**", inline=False)
-    embed.add_field(name="Division", value=f"{teamDivision}", inline=False)
+    embed.add_field(name="**Team Id**", value=f"{str(teamId)}", inline=False)
+    embed.add_field(name="**Venue**", value=f"{teamVenue}", inline=False)
+    embed.add_field(name="**Division**", value=f"{teamDivision}", inline=False)
     embed.set_footer(text=f"Requested by {ctx.author.name}")
     await channel.send(embed=embed)
 
@@ -83,8 +83,10 @@ async def getPlayerDetails(ctx, teamId: int, playerNum: int):
             playerPos = i['position']['name']
             playerRole = i['position']['type']
             playerCity = link['people'][0]['birthCity']
-            playerCountry = link['people'][0]['birthStateProvince']
+            playerCountry = "none"
             playerNationality = link['people'][0]['nationality']
+            if playerNationality == "USA" or playerNationality == "CAN":
+                playerCountry = link['people'][0]['birthStateProvince']
             playerHeight = link['people'][0]['height']
             playerWeight = link['people'][0]['weight']
             handness = link['people'][0]['shootsCatches']
@@ -96,24 +98,25 @@ async def getPlayerDetails(ctx, teamId: int, playerNum: int):
                 playerIsCap = True
             else:
                 playerIsCap = False
-            embed = discord.Embed(title=f"{playerName}",
+            embed = discord.Embed(title=f"**{playerName}**",
                                   color=ctx.guild.me.top_role.color,
                                   timestamp=ctx.message.created_at, )
-            embed.add_field(name="Jersey Number", value=f"{playerNumber}", inline=False)
-            embed.add_field(name="Position", value=f"**{playerPos}**", inline=False)
-            embed.add_field(name="Type", value=f"{playerRole}", inline=False)
-            embed.add_field(name="Hand", value=f"{handness}", inline=False)
-            embed.add_field(name="Birth City", value=f"{playerCity}", inline=False)
-            embed.add_field(name="Country", value=f"**{playerCountry}**", inline=False)
-            embed.add_field(name="Nationality", value=f"{playerNationality}", inline=False)
-            embed.add_field(name="Height", value=f"**{playerHeight}**", inline=False)
-            embed.add_field(name="Weight", value=f"{playerWeight}", inline=False)
+            embed.add_field(name="**Jersey Number**", value=f"{playerNumber}", inline=False)
+            embed.add_field(name="**Position**", value=f"{playerPos}", inline=False)
+            embed.add_field(name="**Type**", value=f"{playerRole}", inline=False)
+            embed.add_field(name="**Hand**", value=f"{handness}", inline=False)
+            if not playerCountry == "none":
+                embed.add_field(name="**Birth City**", value=f"{playerCity}", inline=False)
+            embed.add_field(name="Country**", value=f"{playerCountry}", inline=False)
+            embed.add_field(name="**Nationality**", value=f"{playerNationality}", inline=False)
+            embed.add_field(name="**Height**", value=f"{playerHeight}", inline=False)
+            embed.add_field(name="**Weight**", value=f"{playerWeight}", inline=False)
             if playerIsCap == True:
-                embed.add_field(name="Captain", value=f"True", inline=False)
+                embed.add_field(name="**Captain**", value=f"True", inline=False)
             if playerIsAlt == True:
-                embed.add_field(name="Alternate Captain", value=f"True", inline=False)
+                embed.add_field(name="**Alternate Captain**", value=f"True", inline=False)
             if link['people'][0]['rookie'] == True:
-                embed.add_field(name="Rookie", value=f"True", inline=False)
+                embed.add_field(name="**Rookie**", value=f"True", inline=False)
             embed.set_footer(text=f"Requested by {ctx.author.name}")
             await channel.send(embed=embed)
 

@@ -42,13 +42,15 @@ async def ping(ctx):
 
 nhlResponse = requests.get("https://statsapi.web.nhl.com/api/v1/teams")
 teamArr = []
+
 @client.command()
 async def getNHLTeams(ctx):
-    nhlteams = nhlResponse.json()['teams']
+    nhlteamsj = nhlResponse.json()
+    nhlteams = nhlteamsj['teams']
     for t in nhlteams:
         newArr = [str(t['id']), t['name']]
         teamArr.append(newArr)
-    await ctx.send(tabulate(teamArr, headers=["Team ID", "Team Name"], tablefmt='fancy_grid'))
+    await ctx.send(tabulate(teamArr, headers=["Team ID", "Team Name"]))
 
 
 @client.command()

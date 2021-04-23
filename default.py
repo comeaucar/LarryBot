@@ -147,35 +147,54 @@ async def getPlayerStats(ctx, teamId: int, playerNum: int, year:str):
             playerDetails = "https://statsapi.web.nhl.com/api/v1/people/" + str(
                 i['person']['id'])
             playerName = i['person']['fullName']
-            playerNumber = i['jerseyNumber']
-            playerPos = i['position']['name']
-            seasonType = link['stats'][0]['type']['gameType']['description']
-            gamesPlayed = link['stats'][0]['splits'][0]['stat']['games']
-            goals = link['stats'][0]['splits'][0]['stat']['goals']
-            assists = link['stats'][0]['splits'][0]['stat']['assists']
-            points = link['stats'][0]['splits'][0]['stat']['points']
-            pim = link['stats'][0]['splits'][0]['stat']['pim']
-            ppp = link['stats'][0]['splits'][0]['stat']['powerPlayPoints']
-            gwg = link['stats'][0]['splits'][0]['stat']['gameWinningGoals']
-            plusMinus = link['stats'][0]['splits'][0]['stat']['plusMinus']
-            hits = link['stats'][0]['splits'][0]['stat']['hits']
-            embed = discord.Embed(title=f"{playerName, yearFStr}",
-                                  color=ctx.guild.me.top_role.color,
-                                  timestamp=ctx.message.created_at, )
-            embed.add_field(name="**Player Number**", value=f"{str(playerNumber)}", inline=False)
-            embed.add_field(name="**Position**", value=f"{playerPos}", inline=False)
-            embed.add_field(name="**Season Type**", value=f"{seasonType}", inline=False)
-            embed.add_field(name="**Games Played**", value=f"{str(gamesPlayed)}", inline=False)
-            embed.add_field(name="**Goals**", value=f"{str(goals)}", inline=False)
-            embed.add_field(name="**Assists**", value=f"{str(assists)}", inline=False)
-            embed.add_field(name="**Points**", value=f"{str(points)}", inline=False)
-            embed.add_field(name="**PIM**", value=f"{str(pim)}", inline=False)
-            embed.add_field(name="**Powerplay Points**", value=f"{str(ppp)}", inline=False)
-            embed.add_field(name="**GWG**", value=f"{str(gwg)}", inline=False)
-            embed.add_field(name="**+/-**", value=f"{str(plusMinus)}", inline=False)
-            embed.add_field(name="**Hits**", value=f"{str(hits)}", inline=False)
-            embed.set_footer(text=f"Requested by {ctx.author.name}")
-            await channel.send(embed=embed)
+            if not i['position'] == 'G':
+                playerNumber = i['jerseyNumber']
+                playerPos = i['position']['name']
+                seasonType = link['stats'][0]['type']['gameType']['description']
+                gamesPlayed = link['stats'][0]['splits'][0]['stat']['games']
+                goals = link['stats'][0]['splits'][0]['stat']['goals']
+                assists = link['stats'][0]['splits'][0]['stat']['assists']
+                points = link['stats'][0]['splits'][0]['stat']['points']
+                pim = link['stats'][0]['splits'][0]['stat']['pim']
+                ppp = link['stats'][0]['splits'][0]['stat']['powerPlayPoints']
+                gwg = link['stats'][0]['splits'][0]['stat']['gameWinningGoals']
+                plusMinus = link['stats'][0]['splits'][0]['stat']['plusMinus']
+                hits = link['stats'][0]['splits'][0]['stat']['hits']
+                embed = discord.Embed(title=f"{playerName} + yearFStr",
+                                      color=ctx.guild.me.top_role.color,
+                                      timestamp=ctx.message.created_at, )
+                embed.add_field(name="**Player Number**", value=f"{str(playerNumber)}", inline=False)
+                embed.add_field(name="**Position**", value=f"{playerPos}", inline=False)
+                embed.add_field(name="**Season Type**", value=f"{seasonType}", inline=False)
+                embed.add_field(name="**Games Played**", value=f"{str(gamesPlayed)}", inline=False)
+                embed.add_field(name="**Goals**", value=f"{str(goals)}", inline=False)
+                embed.add_field(name="**Assists**", value=f"{str(assists)}", inline=False)
+                embed.add_field(name="**Points**", value=f"{str(points)}", inline=False)
+                embed.add_field(name="**PIM**", value=f"{str(pim)}", inline=False)
+                embed.add_field(name="**Powerplay Points**", value=f"{str(ppp)}", inline=False)
+                embed.add_field(name="**GWG**", value=f"{str(gwg)}", inline=False)
+                embed.add_field(name="**+/-**", value=f"{str(plusMinus)}", inline=False)
+                embed.add_field(name="**Hits**", value=f"{str(hits)}", inline=False)
+                embed.set_footer(text=f"Requested by {ctx.author.name}")
+                await channel.send(embed=embed)
+            else:
+                embed = discord.Embed(title=f"{playerName} + yearFStr",
+                                      color=ctx.guild.me.top_role.color,
+                                      timestamp=ctx.message.created_at, )
+                wins = link['stats'][0]['splits'][0]['stat']['wins']
+                losses = link['stats'][0]['splits'][0]['stat']['losses']
+                shutouts = link['stats'][0]['splits'][0]['stat']['shutouts']
+                svpercent = link['stats'][0]['splits'][0]['stat']['savePercentage']
+                gaa = link['stats'][0]['splits'][0]['stat']['goalAgainstAverage']
+                gp = link['stats'][0]['splits'][0]['stat']['games']
+                embed.add_field(name="**Wins**", value=f"{str(wins)}", inline=False)
+                embed.add_field(name="**Losses**", value=f"{str(losses)}", inline=False)
+                embed.add_field(name="**Shutouts**", value=f"{str(shutouts)}", inline=False)
+                embed.add_field(name="**Save %**", value=f"{str(svpercent)}", inline=False)
+                embed.add_field(name="GAA", value=f"{str(gaa)}", inline=False)
+                embed.add_field(name="Games Played", value=f"{str(gp)}", inline=False)
+                embed.set_footer(text=f"Requested by {ctx.author.name}")
+                await channel.send(embed=embed)
 
 @client.command()
 async def weather(ctx, *, city: str):

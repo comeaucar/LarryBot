@@ -41,27 +41,15 @@ async def ping(ctx):
 # NHL Api
 
 nhlResponse = requests.get("https://statsapi.web.nhl.com/api/v1/teams")
-teamArray = []
-def getAllTeams():
-    for t in nhlResponse:
-        newArr = [str(t['id']), t['name']]
-        teamArray.append(newArr)
-    table = tabulate(teamArray, headers=['id', 'team name'], tablefmt='fancy_grid')
-    return table
-
-@client.command()
-async def allTeams(ctx):
-    table = getAllTeams()
-    await ctx.send(table)
-
+teamArr = []
 @client.command()
 async def getNHLTeams(ctx):
     nhlteams = nhlResponse.json()['teams']
-    teamArr = []
     for t in nhlteams:
         newArr = [str(t['id']), t['name']]
         teamArr.append(newArr)
     await ctx.send(tabulate(teamArr, headers=["Team ID", "Team Name"], tablefmt='fancy_grid'))
+
 
 @client.command()
 async def getTeamDetails(ctx, teamId):
@@ -80,8 +68,9 @@ async def getTeamDetails(ctx, teamId):
     embed.set_footer(text=f"Requested by {ctx.author.name}")
     await channel.send(embed=embed)
 
+
 @client.command()
-async def getPlayerDetails(ctx, teamId, playerNum):
+async def getPlayerDetails(ctx,*, teamId, playerNum):
     channel = ctx.message.channel
     roster = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId) + "/roster").json()['roster']
     for i in roster:
@@ -128,7 +117,7 @@ async def getPlayerDetails(ctx, teamId, playerNum):
 
 
 @client.command()
-async def getNHLRoster(ctx, teamId):
+async def getNHLRoster(ctx,*, teamId):
     channel = ctx.message.channel
     roster = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId) + "/roster").json()
     rosterArr = []

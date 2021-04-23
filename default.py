@@ -50,7 +50,7 @@ async def getNHLTeams(ctx):
     for t in nhlteams:
         newArr = [str(t['id']), t['name']]
         teamArr.append(newArr)
-    await ctx.send(tabulate(teamArr), headers=['Team ID', "Team Name"], tablefmt='fancy_grid')
+    await ctx.send(tabulate(teamArr, headers=['Team ID', "Team Name"], tablefmt='fancy_grid'))
 
 @client.command()
 async def getTeamDetails(ctx, teamId):

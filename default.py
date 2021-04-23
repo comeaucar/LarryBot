@@ -125,7 +125,7 @@ async def getNHLRoster(ctx, teamId):
         pArr = [roster['roster'][p]['person']['fullName'], roster['roster'][p]['jerseyNumber'],
                 roster['roster'][p]['position']['abbreviation']]
         rosterArr.append(pArr)
-    playerT = tabulate(rosterArr, headers=['Player Name', 'Jersey Number', 'Position'])
+    playerT = tabulate(rosterArr, headers=['Player Name', 'Jersey Number', 'Position'], tablefmt='fancy_grid')
     await ctx.send(playerT)
 
 @client.command()

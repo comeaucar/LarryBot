@@ -50,7 +50,7 @@ async def getNHLTeams(ctx):
     for t in nhlteams:
         newArr = [str(t['id']), t['name']]
         teamArr.append(newArr)
-    await ctx.send(tabulate(teamArr, headers=["Team ID", "Team Name"], tablefmt='fancy_grid'))
+    await ctx.send("```"+tabulate(teamArr, headers=["Team ID", "Team Name"]) + "```")
 
 
 @client.command()
@@ -127,7 +127,7 @@ async def getNHLRoster(ctx,*, teamId:int):
         pArr = [roster['roster'][p]['person']['fullName'], roster['roster'][p]['jerseyNumber'],
                 roster['roster'][p]['position']['abbreviation']]
         rosterArr.append(pArr)
-    playerT = tabulate(rosterArr, headers=['Player Name', 'Jersey Number', 'Position'], tablefmt='fancy_grid')
+    playerT = tabulate(rosterArr, headers=['Player Name', 'Jersey Number', 'Position'])
     await channel.send(playerT)
 
 @client.command()

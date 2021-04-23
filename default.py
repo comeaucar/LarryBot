@@ -117,7 +117,7 @@ async def getPlayerDetails(ctx,*, teamId, playerNum):
 
 
 @client.command()
-async def getNHLRoster(ctx,*, teamId):
+async def getNHLRoster(ctx,*, teamId:int):
     channel = ctx.message.channel
     roster = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId) + "/roster").json()
     rosterArr = []

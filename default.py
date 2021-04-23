@@ -105,9 +105,9 @@ async def getPlayerDetails(ctx, teamId: int, playerNum: int):
             embed.add_field(name="**Position**", value=f"{playerPos}", inline=False)
             embed.add_field(name="**Type**", value=f"{playerRole}", inline=False)
             embed.add_field(name="**Hand**", value=f"{handness}", inline=False)
+            embed.add_field(name="**Birth City**", value=f"{playerCity}", inline=False)
             if not playerCountry == "none":
-                embed.add_field(name="**Birth City**", value=f"{playerCity}", inline=False)
-            embed.add_field(name="Country**", value=f"{playerCountry}", inline=False)
+                embed.add_field(name="**Country**", value=f"{playerCountry}", inline=False)
             embed.add_field(name="**Nationality**", value=f"{playerNationality}", inline=False)
             embed.add_field(name="**Height**", value=f"{playerHeight}", inline=False)
             embed.add_field(name="**Weight**", value=f"{playerWeight}", inline=False)
@@ -131,6 +131,51 @@ async def getNHLRoster(ctx,*, teamId:int):
         rosterArr.append(pArr)
     playerT = tabulate(rosterArr, headers=['Player Name', 'Jersey Number', 'Position'])
     await ctx.send("```"+playerT+"```")
+
+@client.command()
+async def getPlayerStats(ctx, teamId: int, playerNum: int, year:str):
+    postYear = int(year) + 1
+    yearStr = year + str(postYear)
+    yearFStr = year + "/" + str(postYear)
+    channel = ctx.message.channel
+    postYear = int(year) + 1
+    roster = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId) + "/roster").json()['roster']
+    for i in roster:
+        if (int(i['jerseyNumber']) == int(playerNum)):
+            link = requests.get("https://statsapi.web.nhl.com/api/v1/people/" + str(
+                i['person']['id']) + "/stats?stats=statsSingleSeason&season=" + str(yearStr)).json()
+            playerDetails = "https://statsapi.web.nhl.com/api/v1/people/" + str(
+                i['person']['id'])
+            playerName = i['person']['fullName']
+            playerNumber = i['jerseyNumber']
+            playerPos = i['position']['name']
+            seasonType = link['stats'][0]['type']['gameType']['description']
+            gamesPlayed = link['stats'][0]['splits'][0]['stat']['games']
+            goals = link['stats'][0]['splits'][0]['stat']['goals']
+            assists = link['stats'][0]['splits'][0]['stat']['assists']
+            points = link['stats'][0]['splits'][0]['stat']['points']
+            pim = link['stats'][0]['splits'][0]['stat']['pim']
+            ppp = link['stats'][0]['splits'][0]['stat']['powerPlayPoints']
+            gwg = link['stats'][0]['splits'][0]['stat']['gameWinningGoals']
+            plusMinus = link['stats'][0]['splits'][0]['stat']['plusMinus']
+            hits = link['stats'][0]['splits'][0]['stat']['hits']
+            embed = discord.Embed(title=f"{playerName, yearFStr}",
+                                  color=ctx.guild.me.top_role.color,
+                                  timestamp=ctx.message.created_at, )
+            embed.add_field(name="**Player Number**", value=f"{str(playerNumber)}", inline=False)
+            embed.add_field(name="**Position**", value=f"{playerPos}", inline=False)
+            embed.add_field(name="**Season Type**", value=f"{seasonType}", inline=False)
+            embed.add_field(name="**Games Played**", value=f"{gamesPlayed}", inline=False)
+            embed.add_field(name="**Goals**", value=f"{goals}", inline=False)
+            embed.add_field(name="**Assists**", value=f"{assists}", inline=False)
+            embed.add_field(name="**Points**", value=f"{points}", inline=False)
+            embed.add_field(name="**PIM**", value=f"{pim}", inline=False)
+            embed.add_field(name="**Powerplay Points**", value=f"{ppp}", inline=False)
+            embed.add_field(name="**GWG**", value=f"{gwg}", inline=False)
+            embed.add_field(name="**+/-**", value=f"{plusMinus}", inline=False)
+            embed.add_field(name="**Hits**", value=f"{hits}", inline=False)
+            embed.set_footer(text=f"Requested by {ctx.author.name}")
+            await channel.send(embed=embed)
 
 @client.command()
 async def weather(ctx, *, city: str):

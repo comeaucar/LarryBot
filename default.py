@@ -82,17 +82,17 @@ async def getPlayerDetails(ctx, teamId: int, playerNum: int):
             playerNumber = i['jerseyNumber']
             playerPos = i['position']['name']
             playerRole = i['position']['type']
-            playerCity = link['people']['birthCity']
-            playerCountry = link['people']['birthStateProvince']
-            playerNationality = link['people']['nationality']
-            playerHeight = link['people']['height']
-            playerWeight = link['people']['weight']
-            handness = link['people']['shootCatches']
-            if link['people']['alternateCaptain'] == True:
+            playerCity = link['people'][0]['birthCity']
+            playerCountry = link['people'][0]['birthStateProvince']
+            playerNationality = link['people'][0]['nationality']
+            playerHeight = link['people'][0]['height']
+            playerWeight = link['people'][0]['weight']
+            handness = link['people'][0]['shootsCatches']
+            if link['people'][0]['alternateCaptain'] == True:
                 playerIsAlt = True
             else:
                 playerIsAlt = False
-            if link['people']['captain'] == True:
+            if link['people'][0]['captain'] == True:
                 playerIsCap = True
             else:
                 playerIsCap = False
@@ -112,7 +112,7 @@ async def getPlayerDetails(ctx, teamId: int, playerNum: int):
                 embed.add_field(name="Captain", value=f"True", inline=False)
             if playerIsAlt == True:
                 embed.add_field(name="Alternate Captain", value=f"True", inline=False)
-            if link['people']['rookie'] == True:
+            if link['people'][0]['rookie'] == True:
                 embed.add_field(name="Rookie", value=f"True", inline=False)
             embed.set_footer(text=f"Requested by {ctx.author.name}")
             await channel.send(embed=embed)

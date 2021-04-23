@@ -12,8 +12,10 @@ client = commands.Bot(command_prefix='.', case_insensitive=True)
 
 playerList = []
 
+# Weather api
 api_key = "64c25ea20b450ab59e4e0f5cd2158176"
 base_url = "http://api.openweathermap.org/data/2.5/weather?"
+
 
 @client.event
 async def on_ready():
@@ -23,17 +25,108 @@ async def on_ready():
 
 @client.event
 async def on_member_join(member):
-    print(f'Welcome {member}, I am better than you at COD.')
+    print(f'Welcome {member}')
 
 
 @client.event
 async def on_member_remove(member):
-    print(f'See ya boss {member}')
+    print(f'See ya {member}')
 
 
 @client.command()
 async def ping(ctx):
     await ctx.send('Pong')
+
+
+# NHL Api
+
+nhlResponse = requests.get("https://statsapi.web.nhl.com/api/v1/teams")
+
+
+@client.command()
+async def getNHLTeams(ctx):
+    nhlteams = nhlResponse.json()['teams']
+    teamArr = []
+    for t in nhlteams:
+        newArr = [str(t['id']), t['name']]
+        teamArr.append(newArr)
+    await ctx.send(tabulate(teamArr), headers=['Team ID', "Team Name"], tablefmt='fancy_grid')
+
+@client.command()
+async def getTeamDetails(ctx, teamId):
+    channel = ctx.message.channel
+    team = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(id)).json()
+    teamName = team['teams'][0]['name']
+    teamVenue = team['teams'][0]['venue']['name']
+    teamDivision = team['teams'][0]['division']['name']
+    teamId = team['teams'][0]['id']
+    embed = discord.Embed(title=f"{teamName}",
+                          color=ctx.guild.me.top_role.color,
+                          timestamp=ctx.message.created_at, )
+    embed.add_field(name="Team Id", value=f"{str(teamId)}", inline=False)
+    embed.add_field(name="Venue", value=f"**{teamVenue}**", inline=False)
+    embed.add_field(name="Division", value=f"{teamDivision}", inline=False)
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await channel.send(embed=embed)
+
+@client.command()
+def getPlayerDetails(ctx, teamId, playerNum):
+    channel = ctx.message.channel
+    roster = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId) + "/roster").json()['roster']
+    for i in roster:
+        if (int(i['jerseyNumber']) == playerNum):
+            link = requests.get("https://statsapi.web.nhl.com/api/v1/people/" + str(i['person']['id'])).json()
+            playerName = i['person']['fullName']
+            playerNumber = i['jerseyNumber']
+            playerPos = i['position']['name']
+            playerRole = i['position']['type']
+            playerCity = link['people']['birthCity']
+            playerCountry = link['people']['birthStateProvince']
+            playerNationality = link['people']['nationality']
+            playerHeight = link['people']['height']
+            playerWeight = link['people']['weight']
+            handness = link['people']['shootCatches']
+            if link['people']['alternateCaptain'] == True:
+                playerIsAlt = True
+            else:
+                playerIsAlt = False
+            if link['people']['captain'] == True:
+                playerIsCap = True
+            else:
+                playerIsCap = False
+            embed = discord.Embed(title=f"{playerName}",
+                                  color=ctx.guild.me.top_role.color,
+                                  timestamp=ctx.message.created_at, )
+            embed.add_field(name="Jersey Number", value=f"{playerNumber}", inline=False)
+            embed.add_field(name="Position", value=f"**{playerPos}**", inline=False)
+            embed.add_field(name="Type", value=f"{playerRole}", inline=False)
+            embed.add_field(name="Hand", value=f"{handness}", inline=False)
+            embed.add_field(name="Birth City", value=f"{playerNumber}", inline=False)
+            embed.add_field(name="Country", value=f"**{playerPos}**", inline=False)
+            embed.add_field(name="Nationality", value=f"{playerRole}", inline=False)
+            embed.add_field(name="Height", value=f"**{playerPos}**", inline=False)
+            embed.add_field(name="Weight", value=f"{playerRole}", inline=False)
+            if playerIsCap == True:
+                embed.add_field(name="Captain", value=f"True", inline=False)
+            if playerIsAlt == True:
+                embed.add_field(name="Alternate Captain", value=f"True", inline=False)
+            if link['people']['rookie'] == True:
+                embed.add_field(name="Rookie", value=f"True", inline=False)
+            embed.set_footer(text=f"Requested by {ctx.author.name}")
+            await channel.send(embed=embed)
+
+
+@client.command()
+async def getNHLRoster(ctx, teamId):
+    team = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId)).json()
+    roster = requests.get("https://statsapi.web.nhl.com/api/v1/teams/" + str(teamId) + "/roster").json()
+    rosterArr = []
+    for p in range(len(roster['roster'])):
+        pArr = [roster['roster'][p]['person']['fullName'], roster['roster'][p]['jerseyNumber'],
+                roster['roster'][p]['position']['abbreviation']]
+        rosterArr.append(pArr)
+    playerT = tabulate(rosterArr, headers=['Player Name', 'Jersey Number', 'Position'])
+    await ctx.send(playerT)
 
 @client.command()
 async def weather(ctx, *, city: str):
@@ -140,7 +233,6 @@ def findPlayer(player):
             return p
 
 
-@commands.has_any_role("Lebron's Aunt")
 @client.command()
 async def addPlayer(ctx, player):
     if playerExists(player) == 1:
@@ -151,7 +243,6 @@ async def addPlayer(ctx, player):
     await ctx.send("Player successfully added.")
 
 
-@commands.has_any_role("Lebron's Aunt")
 @client.command()
 async def addPlayerWRating(ctx, player, rating):
     if playerExists(player) == 1:
@@ -198,7 +289,6 @@ async def showPlayerLoc(player):
         return "Player " + player + " does not exist."
 
 
-@commands.has_any_role("Lebron's Aunt")
 @client.command(brief="Changes specified users rating")
 async def editRating(ctx, player, rating):
     if findPlayer(player) != -1:
@@ -212,7 +302,6 @@ async def editRating(ctx, player, rating):
         await ctx.send(tabulate(newList, headers=["Player", "Rating"], tablefmt='fancy_grid'))
 
 
-@commands.has_any_role("Lebron's Aunt")
 @client.command(brief="Removes player from list")
 async def removePlayer(ctx, player):
     if findPlayer(player) != -1:
@@ -252,44 +341,6 @@ async def addMeRated(ctx, rating):
     await ctx.send("Player successfully added.")
 
 
-@client.command()
-async def makeWeightedTeamsOld(ctx, *players):
-    defList = []
-    if len(players) == 0:
-        await ctx.send("Cannot have zero players")
-        return
-    else:
-        await ctx.send("Forming fair teams...")
-        for p in players:
-            defList.append(mysplit(p))
-        defList.sort(key=takeSecond, reverse=True)
-        for i in range(len(defList)):
-            if defList[i][1] > 10 or defList[i][1] < 0:
-                await ctx.send("There is a rating higher than 10 or lower than 0\nThe ratings maximum is 10 and "
-                               "minimum is 0")
-                return
-        teamOne = []
-        teamTwo = []
-        for num in range(len(defList)):
-            if num == 0:
-                teamOne.append(defList[num])
-                continue
-            if num == 1:
-                teamTwo.append(defList[num])
-                continue
-            if num % 2 == 0:
-                teamTwo.append(defList[num])
-            else:
-                teamOne.append(defList[num])
-        await ctx.send("Team One\n-------------------")
-        await asyncio.sleep(1)
-        for p in teamOne:
-            await ctx.send(p)
-        await asyncio.sleep(2)
-        await ctx.send("\nTeam Two\n--------------------")
-        await asyncio.sleep(1)
-        for p in teamTwo:
-            await ctx.send(p)
 
 
 @client.command(brief="Makes fair teams based on player ratings")

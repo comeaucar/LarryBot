@@ -1,15 +1,13 @@
 import asyncio
-import time
 from tabulate import tabulate
 import discord
 from discord.ext import commands, tasks
 import random
 import math
-import os
 import requests
+from datetime import date, timedelta
 
 client = commands.Bot(command_prefix='.', case_insensitive=True)
-
 playerList = []
 
 # Weather api
@@ -41,10 +39,10 @@ async def ping(ctx):
 # NHL Api
 
 nhlResponse = requests.get("https://statsapi.web.nhl.com/api/v1/teams")
-teamArr = []
 
 @client.command()
 async def getNHLTeams(ctx):
+    teamArr = []
     nhlteamsj = nhlResponse.json()
     nhlteams = nhlteamsj['teams']
     for t in nhlteams:
@@ -196,6 +194,191 @@ async def getPlayerStats(ctx, teamId: int, playerNum: int, year:str):
                 embed.set_footer(text=f"Requested by {ctx.author.name}")
                 await channel.send(embed=embed)
 
+# soccer api
+headers = {
+    "apikey": "852ce3b0-a51d-11eb-a4e1-e9fa778bd020"}
+
+@client.command()
+async def getCountries(ctx, cont):
+    params = (
+        ("continent", cont),
+    )
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/countries', headers=headers, params=params).json()['data']
+    codesArr = []
+    countriesArr = []
+    for i in response:
+        codesArr.append(i)
+    for r in range(len(codesArr)):
+        country = [response[codesArr[r]]['country_id'], response[codesArr[r]]['name']]
+        countriesArr.append(country)
+    await ctx.send(tabulate(countriesArr, headers=["Country ID", "Name"]))
+
+@client.command()
+async def getLeagues(ctx):
+    params = (
+        ("subscribed", True),
+    )
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/leagues', headers=headers, params=params).json()['data']
+    leaugeOne = [response[0]['league_id'],response[0]['name']]
+    leaugeTwo = [response[1]['league_id'], response[1]['name']]
+    leagues = [leaugeOne,leaugeTwo]
+    await ctx.send(tabulate(leagues, headers=["League ID", "Name"]))
+
+@client.command()
+async def getTeams(ctx,countryId):
+    params = (
+        ("country_id", countryId),
+    )
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/teams', headers=headers, params=params).json()['data']
+    teamArr = []
+    charLen = 0
+    for i in range(len(response)):
+        team = [response[i]['team_id'], response[i]['name']]
+        charLen += len(str(response[i]['team_id'])) + len(response[i]['name'])
+        if charLen >= 1000:
+            await ctx.send(tabulate(teamArr, headers=["Team ID", "Name"]))
+            charLen = 0
+            del(teamArr)
+            teamArr = []
+        teamArr.append(team)
+    await ctx.send(tabulate(teamArr, headers=["Team ID", "Name"]))
+
+@client.command()
+async def getTeamInfo(ctx, id):
+    channel = ctx.message.channel
+    params = (
+    )
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/teams/' + id, headers=headers, params=params).json()['data']
+    embed = discord.Embed(title=f"{response['name']}",
+                          color=ctx.guild.me.top_role.color,
+                          timestamp=ctx.message.created_at, )
+    embed.add_field(name="Short Code", value=f"**{response['short_code']}**", inline=False)
+    embed.add_field(name="Team ID", value=f"**{str(response['team_id'])}**", inline=False)
+    embed.set_thumbnail(url=response['logo'])
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await channel.send(embed=embed)
+
+@client.command()
+async def getSeasons(ctx,leagueId):
+    params = (
+        ("league_id", leagueId),
+    )
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/seasons', headers=headers, params=params).json()['data']
+    seasonsArr = []
+    for i in range(len(response)):
+        season = [response[i]['season_id'], response[i]['name'], response[i]['start_date'], response[i]['end_date']]
+        seasonsArr.append(season)
+    await ctx.send(tabulate(seasonsArr, headers=["Season ID", "Name", "Start Date", "End Date"]))
+
+@client.command()
+async def getMatches(ctx, seasonId, dateFrom = "0000-00-00", dateTo = "2100-01-01"):
+    params = (
+        ("season_id", seasonId),
+        ("date_from", dateFrom),
+        ("date_to", dateTo)
+    )
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/matches', headers=headers, params=params).json()['data']
+    matchesArr = []
+    for i in range(len(response)):
+        match = [response[i]['match_id'], response[i]['status'], response[i]['match_start'], response[i]['home_team']['name'],response[i]['away_team']['name'],response[i]['stats']['ft_score']]
+        matchesArr.append(match)
+    await ctx.send(tabulate(matchesArr, headers=["Match Id", "Status", "Match Start", "Home Team", "Away Team", "Final Score (Home-Away)"]))
+
+target_channel_id = 829376713266823230
+
+@tasks.loop(hours=24)
+async def getMatchesLoop(seasonId = 619):
+    today = date.today()
+    tomorrow = date.today() + timedelta(days=1)
+    params = (
+        ("season_id", seasonId),
+        ("date_from", today),
+        ("date_to", tomorrow)
+    )
+    message_channel = client.get_channel(target_channel_id)
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/matches', headers=headers, params=params).json()['data']
+    matchesArr = []
+    for i in range(len(response)):
+        match = [response[i]['match_id'], response[i]['status'],response[i]['home_team']['name'],response[i]['away_team']['name'],response[i]['stats']['ft_score']]
+        matchesArr.append(match)
+    await message_channel.send("Today's Serie A Results")
+    await message_channel.send(tabulate(matchesArr, headers=["Match Id", "Status", "Home Team", "Away Team", "Final Score (Home-Away)"]))
+
+@getMatchesLoop.before_loop
+async def before():
+    await client.wait_until_ready()
+    print("Finished Waiting")
+
+
+@client.command()
+async def getLiveMatches(ctx, seasonId):
+    params = (
+        ("season_id", seasonId),
+        ("live", True)
+    )
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/matches', headers=headers, params=params).json()['data']
+    matchesArr = []
+    for i in range(len(response)):
+        match = [response[i]['match_id'], response[i]['status'], response[i]['match_start'], response[i]['home_team']['name'],response[i]['away_team']['name'],response[i]['stats']['ft_score']]
+        matchesArr.append(match)
+    await ctx.send(tabulate(matchesArr, headers=["Match Id", "Status", "Match Start", "Home Team", "Away Team", "Final Score (Home-Away)"]))
+
+@client.command()
+async def getPlayers(ctx,countryId, minAge = 0, maxAge = 100):
+    params = (
+        ("country_id", countryId),
+        ("min_age", minAge),
+        ("max_age", maxAge)
+    )
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/players', headers=headers, params=params).json()['data']
+    playersArr = []
+    charLen = 0
+    for i in range(len(response)):
+        player = [response[i]['player_id'], response[i]['firstname'], response[i]['lastname'], response[i]['age']]
+        charLen += len(str(response[i]['player_id'])) + len(response[i]['firstname']) + len(response[i]['lastname']) + len(str(response[i]['age']))
+        if charLen >= 500:
+            await ctx.send(tabulate(playersArr, headers=["Player ID", "First Name", "Last Name", "Age"]))
+            del(playersArr)
+            charLen = 0
+            playersArr = []
+        playersArr.append(player)
+    await ctx.send(tabulate(playersArr, headers=["Player ID", "First Name", "Last Name","Age"]))
+
+@client.command()
+async def getPlayerInfo(ctx, playerId):
+    params = (
+    )
+    channel = ctx.message.channel
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/players/' + playerId, headers=headers, params=params).json()['data']
+    embed = discord.Embed(title=f"{response['firstname'] + ' ' + response['lastname']}",
+                          color=ctx.guild.me.top_role.color,
+                          timestamp=ctx.message.created_at, )
+    embed.add_field(name="Age", value=f"**{str(response['age'])}**", inline=False)
+    embed.add_field(name="Birthday", value=f"**{response['birthday']}**", inline=False)
+    embed.set_thumbnail(url=response['img'])
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await channel.send(embed=embed)
+
+@client.command()
+async def topScorers(ctx,seasonId):
+    params = (
+        ("season_id", seasonId),
+    )
+    response = requests.get('https://app.sportdataapi.com/api/v1/soccer/topscorers', headers=headers, params=params).json()['data']
+    standings = []
+    charLen = 0
+    for i in range(len(response)):
+        player = [response[i]['pos'],response[i]['player']['player_name'], response[i]['team']['team_name'], response[i]['goals']['overall']]
+        charLen += len(str(response[i]['pos'])) + len(response[i]['player']['player_name']) + len(response[i]['team']['team_name']) + len(str(response[i]['goals']['overall']))
+        if charLen >= 500:
+            await ctx.send(tabulate(standings, headers=["Rank", "Player", "Team", "Goals"]))
+            del(standings)
+            charLen = 0
+            standings = []
+        standings.append(player)
+    await ctx.send(tabulate(standings, headers=["Rank", "Player", "Team", "Goals"]))
+
+# weather api
 @client.command()
 async def weather(ctx, *, city: str):
     city_name = city
@@ -229,23 +412,41 @@ async def weather(ctx, *, city: str):
     else:
         await channel.send("City not found.")
 
-@client.command()
-async def windsorWeatherReport(ctx):
-    url = "https://community-open-weather-map.p.rapidapi.com/weather"
-    querystring = {"q": "Windsor", "lat": "0", "lon": "0", "callback": "test", "id": "2172797", "lang": "null",
-                   "units": "metric", "mode": "xml, html"}
-    headers = {
-        'x-rapidapi-key': "af9c139833mshfbd108e5b781b27p1ee771jsn2060a2fe19f1",
-        'x-rapidapi-host': "community-open-weather-map.p.rapidapi.com"
-    }
-    response = requests.request("GET", url, headers=headers, params=querystring)
-    await ctx.send("Good Morning! Here is Windsor Weather for Today")
-    await ctx.send("")
-    await ctx.send("Weather Right Now: " + response.text.split(',')[4].split(':')[1].strip('"'))
-    await ctx.send("Current Temperature: " + response.text.split(',')[7].split(':')[2] + '℃')
-    await ctx.send("Today's Low: " + response.text.split(',')[9].split(':')[1])
-    await ctx.send("Today's High: " + response.text.split(',')[10].split(':')[1])
+@tasks.loop(hours=24)
+async def windsorWeatherReport():
+    city_name = "Windsor"
+    complete_url = base_url + "appid=" + api_key + "&q=" + city_name
+    response = requests.get(complete_url)
+    x = response.json()
+    channel = client.get_channel(target_channel_id)
+    if x["cod"] != "404":
+        async with channel.typing():
+            y = x["main"]
+            current_temperature = y["temp"]
+            current_temperature_celsiuis = str(round(current_temperature - 273.15))
+            current_pressure = y["pressure"]
+            current_humidity = y["humidity"]
+            temp_high = str(round(y['temp_max'] - 273.15))
+            temp_low = str(round(y['temp_min'] - 273.15))
+            z = x["weather"]
+            weather_description = z[0]["description"]
+            embed = discord.Embed(title=f"Weather in {city_name}")
+            embed.add_field(name="Descripition", value=f"**{weather_description}**", inline=False)
+            embed.add_field(name="Current Temperature(C)", value=f"**{current_temperature_celsiuis}°C**", inline=False)
+            embed.add_field(name="High Temperature for Today(C)", value=f"**{temp_high}°C**", inline=False)
+            embed.add_field(name="Low Temperature for Today(C)", value=f"**{temp_low}°C**", inline=False)
+            embed.add_field(name="Humidity(%)", value=f"**{current_humidity}%**", inline=False)
+            embed.add_field(name="Atmospheric Pressure(hPa)", value=f"**{current_pressure}hPa**", inline=False)
+            embed.set_thumbnail(url="https://i.ibb.co/CMrsxdX/weather.png")
+            await channel.send(embed=embed)
+    else:
+        await channel.send("City not found.")
 
+@windsorWeatherReport.before_loop
+async def before():
+    await asyncio.sleep(50400)
+    await client.wait_until_ready()
+    print("Finished Waiting (weather)")
 
 @client.command()
 async def bestCODPlayer(ctx):
@@ -468,6 +669,10 @@ class MyHelpCommand(commands.MinimalHelpCommand):
         await destination.send(embed=e)
 
 
+
 client.help_command = MyHelpCommand()
+
+getMatchesLoop.start()
+windsorWeatherReport.start()
 
 client.run(os.environ['token'])

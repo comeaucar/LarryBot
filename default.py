@@ -5,6 +5,7 @@ from discord.ext import commands, tasks
 import random
 import math
 import requests
+import os
 from datetime import date, timedelta
 
 client = commands.Bot(command_prefix='.', case_insensitive=True)

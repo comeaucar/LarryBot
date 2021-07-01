@@ -288,9 +288,9 @@ async def getMatches(ctx, seasonId, dateFrom = "0000-00-00", dateTo = "2100-01-0
 target_channel_id = 829376713266823230
 
 @tasks.loop(hours=24)
-async def getMatchesLoop(seasonId = 619):
+async def getMatchesLoop(seasonId = 510):
     today = date.today()
-    tomorrow = date.today() + timedelta(days=1)
+    tomorrow = date.today() + timedelta(days=2)
     params = (
         ("season_id", seasonId),
         ("date_from", today),

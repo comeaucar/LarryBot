@@ -302,7 +302,7 @@ async def getMatchesLoop(seasonId = 510):
     for i in range(len(response)):
         match = [response[i]['match_id'], response[i]['status'],response[i]['home_team']['name'],response[i]['away_team']['name'],response[i]['stats']['ft_score']]
         matchesArr.append(match)
-    await message_channel.send("Today's Serie A Results")
+    await message_channel.send("Euro Results")
     await message_channel.send(tabulate(matchesArr, headers=["Match Id", "Status", "Home Team", "Away Team", "Final Score (Home-Away)"]))
 
 @getMatchesLoop.before_loop

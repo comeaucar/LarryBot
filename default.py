@@ -36,6 +36,19 @@ async def on_member_remove(member):
 async def ping(ctx):
     await ctx.send('Pong')
 
+@client.command()
+async def bet(ctx,user, wager, desc):
+    channel = client.get_channel(865737533748019231)
+    embed = discord.Embed(
+        title="BET",
+        color=channel.guild.me.top_role.color,
+        timestamp=channel.message.created_at
+    )
+    embed.add_field(name='**Users**', value=f"{ctx.author}" + ' & ' + f"{user}", inline=False)
+    embed.add_field(name='**Wager**', value=f"{wager}", inline=False)
+    embed.add_field(name='**Description**', value=f"{desc}", inline=False)
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await channel.send(embed=embed)
 
 # NHL Api
 

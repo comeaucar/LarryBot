@@ -40,7 +40,7 @@ async def ping(ctx):
 
 @client.command()
 async def bet(ctx, *args):
-    channel = client.get_channel(865737533748019231)
+    channel = client.get_channel(859498450977423417)
     user = args[0]
     wager = args[1]
     desc = ""

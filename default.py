@@ -36,14 +36,24 @@ async def on_member_remove(member):
 async def ping(ctx):
     await ctx.send('Pong')
 
+# Betting implementation
+
 @client.command()
-async def bet(ctx,user, wager, desc):
+async def bet(ctx, *args):
     channel = client.get_channel(865737533748019231)
+    user = args[0]
+    wager = args[1]
+    desc = ""
+    for x in range(len(args)):
+        if x > 1:
+            desc = desc + args[x] + " "
     embed = discord.Embed(
-        title="BET",
+        title="**BET CREATED**",
         color=channel.guild.me.top_role.color,
-        timestamp=channel.message.created_at
+        timestamp=ctx.message.created_at
     )
+    if not wager[0] == "$":
+        wager = "$" + wager
     embed.add_field(name='**Users**', value=f"{ctx.author}" + ' & ' + f"{user}", inline=False)
     embed.add_field(name='**Wager**', value=f"{wager}", inline=False)
     embed.add_field(name='**Description**', value=f"{desc}", inline=False)
